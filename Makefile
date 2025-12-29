@@ -114,6 +114,10 @@ test-integration-quick: test-services-up ## Run integration tests (assumes servi
 	 export KAFKA_BROKERS="localhost:9092" && \
 	 go test -v -tags=integration ./test/integration/... -timeout=5m
 
+test-integration-ci: ## Run integration tests in CI environment (services already running)
+	@echo "Running integration tests (CI mode)..."
+	@go test -v -tags=integration ./test/integration/... -timeout=5m
+
 test-all: test test-integration ## Run all tests (unit + integration)
 
 test-ci: test-short test-parser test-http test-samples ## Run CI-safe tests (no external services required)

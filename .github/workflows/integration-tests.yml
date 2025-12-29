@@ -126,7 +126,7 @@ jobs:
           ./scripts/init-clickhouse.sh
 
       - name: Run integration tests
-        run: make test-integration-quick
+        run: make test-integration-ci
         env:
           PARSEDMARC_TEST_MODE: true
           CLICKHOUSE_URL: tcp://localhost:9000
@@ -134,6 +134,22 @@ jobs:
           CLICKHOUSE_PASSWORD: test123
           CLICKHOUSE_DATABASE: parsedmarc_test
           KAFKA_BROKERS: localhost:9092
+
+      - name: Service diagnostics on failure
+        if: failure()
+        run: |
+          echo "=== Service Diagnostics ==="
+          echo "ClickHouse status:"
+          curl -s http://localhost:8123/ping || echo "ClickHouse not responding"
+          echo ""
+          echo "Kafka port status:"
+          nc -zv localhost 9092 || echo "Kafka port not open"
+          echo ""
+          echo "MailHog port status:"
+          nc -zv localhost 1025 || echo "MailHog port not open"
+          echo ""
+          echo "Running containers:"
+          docker ps || echo "Cannot list containers"
 
       - name: Generate integration test report
         if: always()
