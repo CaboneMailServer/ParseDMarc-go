@@ -18,3 +18,5 @@ parsedmarc/resources/maps/unknown_base_reverse_dns.csv
 /build/*
 /debug-config.yaml
 /debug_attachment.gz
+/coverage.html
+/coverage.out
