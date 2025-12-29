@@ -74,7 +74,7 @@ The conversion to Go was done with **Claude AI**, adding significant improvement
 
 ```bash
 # Download and install
-curl -L -o parsedmarc-go https://github.com/ZenProjects/parsedmarc-go/releases/latest/download/parsedmarc-go-linux-amd64
+curl -L -o parsedmarc-go https://github.com/CaboneMailServer/ParseDMarc-go/releases/latest/download/parsedmarc-go-linux-amd64
 chmod +x parsedmarc-go
 
 # Parse a report
@@ -201,31 +201,31 @@ parsedmarc-go implements the following email authentication and reporting standa
 ### 📖 Table of Contents
 
 #### 🚀 **Getting Started**
-- **[📋 Complete Documentation](https://zenprojects.github.io/parsedmarc-go/docs/index)** - Overview and architecture
-- **[⚡ Installation](https://zenprojects.github.io/parsedmarc-go/docs/installation)** - Installation and initial setup  
-- **[⚙️ Configuration](https://zenprojects.github.io/parsedmarc-go/docs/configuration)** - Detailed configuration options
-- **[💡 Usage](https://zenprojects.github.io/parsedmarc-go/docs/usage)** - Usage guide and examples
+- **[📋 Complete Documentation](https://cabonemailserver.github.io/ParseDMarc-go/docs/index)** - Overview and architecture
+- **[⚡ Installation](https://cabonemailserver.github.io/ParseDMarc-go/docs/installation)** - Installation and initial setup  
+- **[⚙️ Configuration](https://cabonemailserver.github.io/ParseDMarc-go/docs/configuration)** - Detailed configuration options
+- **[💡 Usage](https://cabonemailserver.github.io/ParseDMarc-go/docs/usage)** - Usage guide and examples
 
 #### 🗄️ **Database and Visualization**
-- **[🗃️ ClickHouse](https://zenprojects.github.io/parsedmarc-go/docs/clickhouse)** - ClickHouse configuration and optimization
-- **[📊 Grafana](https://zenprojects.github.io/parsedmarc-go/docs/grafana)** - Dashboards and visualizations
-- **[📈 Monitoring](https://zenprojects.github.io/parsedmarc-go/docs/monitoring)** - Prometheus metrics and monitoring
+- **[🗃️ ClickHouse](https://cabonemailserver.github.io/ParseDMarc-go/docs/clickhouse)** - ClickHouse configuration and optimization
+- **[📊 Grafana](https://cabonemailserver.github.io/ParseDMarc-go/docs/grafana)** - Dashboards and visualizations
+- **[📈 Monitoring](https://cabonemailserver.github.io/ParseDMarc-go/docs/monitoring)** - Prometheus metrics and monitoring
 
 #### 🔌 **API and Integrations**  
-- **[🌐 HTTP API](https://zenprojects.github.io/parsedmarc-go/docs/api)** - HTTP endpoints and integrations
-- **[📧 DMARC Mailing Lists](https://zenprojects.github.io/parsedmarc-go/docs/mailing-lists)** - Mailing list configuration
+- **[🌐 HTTP API](https://cabonemailserver.github.io/ParseDMarc-go/docs/api)** - HTTP endpoints and integrations
+- **[📧 DMARC Mailing Lists](https://cabonemailserver.github.io/ParseDMarc-go/docs/mailing-lists)** - Mailing list configuration
 
 #### 📖 **Technical References**
-- **[🔒 DMARC Specification](https://zenprojects.github.io/parsedmarc-go/docs/dmarc)** - DMARC standards details
+- **[🔒 DMARC Specification](https://cabonemailserver.github.io/ParseDMarc-go/docs/dmarc)** - DMARC standards details
 - **[🤝 Contributing](docs/contributing.md)** - Project contribution guide
 
 ### 🔗 Quick Links
-- **[Quick Setup](https://zenprojects.github.io/parsedmarc-go/docs/installation#quick-setup)** - Get started in 5 minutes
-- **[API Examples](https://zenprojects.github.io/parsedmarc-go/docs/api#examples)** - Ready-to-use HTTP integrations
-- **[Grafana Dashboards](https://zenprojects.github.io/parsedmarc-go/docs/grafana#dashboards)** - Pre-configured visualizations
-- **[Prometheus Metrics](https://zenprojects.github.io/parsedmarc-go/docs/monitoring#metrics)** - Complete monitoring
+- **[Quick Setup](https://cabonemailserver.github.io/ParseDMarc-go/docs/installation#quick-setup)** - Get started in 5 minutes
+- **[API Examples](https://cabonemailserver.github.io/ParseDMarc-go/docs/api#examples)** - Ready-to-use HTTP integrations
+- **[Grafana Dashboards](https://cabonemailserver.github.io/ParseDMarc-go/docs/grafana#dashboards)** - Pre-configured visualizations
+- **[Prometheus Metrics](https://cabonemailserver.github.io/ParseDMarc-go/docs/monitoring#metrics)** - Complete monitoring
 
-> 💡 **Tip**: Start with the [complete documentation](https://zenprojects.github.io/parsedmarc-go/docs/index) for an overview, then check the [installation guide](https://zenprojects.github.io/parsedmarc-go/docs/installation) to get started quickly.
+> 💡 **Tip**: Start with the [complete documentation](https://cabonemailserver.github.io/ParseDMarc-go/docs/index) for an overview, then check the [installation guide](https://cabonemailserver.github.io/ParseDMarc-go/docs/installation) to get started quickly.
 
 ## License
 
