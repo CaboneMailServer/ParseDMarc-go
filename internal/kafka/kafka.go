@@ -203,59 +203,45 @@ func (c *Client) TestConnection() error {
 		return fmt.Errorf("Kafka not enabled or no hosts configured")
 	}
 
-	// Create a simple connection test using a reader
-	readerConfig := kafka.ReaderConfig{
-		Brokers: c.config.Hosts,
-		Topic:   "test-connection",
-		GroupID: "parsedmarc-connection-test",
+	// Try to connect to Kafka brokers using a dialer with timeout
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	// Create a dialer for the connection
+	dialer := &kafka.Dialer{
+		Timeout:   10 * time.Second,
+		DualStack: true,
 	}
 
 	// Configure TLS if enabled
 	if c.config.SSL {
-		tlsConfig := &tls.Config{
+		dialer.TLS = &tls.Config{
 			InsecureSkipVerify: c.config.SkipVerify,
-		}
-		readerConfig.Dialer = &kafka.Dialer{
-			Timeout:   10 * time.Second,
-			DualStack: true,
-			TLS:       tlsConfig,
 		}
 	}
 
-	// Configure SASL authentication if credentials are provided
+	// Configure SASL if credentials provided
 	if c.config.Username != "" && c.config.Password != "" {
 		mechanism := plain.Mechanism{
 			Username: c.config.Username,
 			Password: c.config.Password,
 		}
-
-		if readerConfig.Dialer == nil {
-			readerConfig.Dialer = &kafka.Dialer{
-				Timeout:   10 * time.Second,
-				DualStack: true,
-			}
-		}
-		readerConfig.Dialer.SASLMechanism = mechanism
+		dialer.SASLMechanism = mechanism
 	}
 
-	reader := kafka.NewReader(readerConfig)
-	defer reader.Close()
-
-	// Try to connect with timeout
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	// Just try to fetch metadata to test connection
-	_, err := reader.FetchMessage(ctx)
+	// Try to establish a connection to the first broker
+	conn, err := dialer.DialContext(ctx, "tcp", c.config.Hosts[0])
 	if err != nil {
-		// We expect this to fail since we're using a test topic
-		// But if we get a connection-related error, return it
-		if ctx.Err() == context.DeadlineExceeded {
-			return fmt.Errorf("connection timeout to Kafka brokers")
-		}
-		// Other errors might be expected (like topic not found), so we consider the connection working
-		c.logger.Debug("Kafka connection test completed", zap.Error(err))
+		return fmt.Errorf("failed to connect to Kafka broker %s: %w", c.config.Hosts[0], err)
+	}
+	defer conn.Close()
+
+	// Try to get broker metadata to verify the connection works
+	_, err = conn.Brokers()
+	if err != nil {
+		return fmt.Errorf("failed to get broker metadata: %w", err)
 	}
 
+	c.logger.Debug("Successfully connected to Kafka", zap.Strings("brokers", c.config.Hosts))
 	return nil
 }
