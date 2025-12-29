@@ -28,10 +28,7 @@ run_query "CREATE DATABASE IF NOT EXISTS ${CLICKHOUSE_DATABASE}"
 
 # Créer les tables pour les rapports d'agrégation
 echo "Creating aggregate_reports table..."
-run_query "
-USE ${CLICKHOUSE_DATABASE};
-
-CREATE TABLE IF NOT EXISTS aggregate_reports (
+run_query "CREATE TABLE IF NOT EXISTS ${CLICKHOUSE_DATABASE}.aggregate_reports (
     id UUID DEFAULT generateUUIDv4(),
     date_created DateTime DEFAULT now(),
     xml_schema String,
@@ -48,15 +45,11 @@ CREATE TABLE IF NOT EXISTS aggregate_reports (
     pct String,
     fo String
 ) ENGINE = MergeTree()
-ORDER BY (date_created, org_name, report_id);
-"
+ORDER BY (date_created, org_name, report_id)"
 
 # Créer les tables pour les enregistrements des rapports d'agrégation
 echo "Creating aggregate_records table..."
-run_query "
-USE ${CLICKHOUSE_DATABASE};
-
-CREATE TABLE IF NOT EXISTS aggregate_records (
+run_query "CREATE TABLE IF NOT EXISTS ${CLICKHOUSE_DATABASE}.aggregate_records (
     id UUID DEFAULT generateUUIDv4(),
     report_id String,
     source_ip IPv4,
@@ -72,15 +65,11 @@ CREATE TABLE IF NOT EXISTS aggregate_records (
     envelope_to String,
     date_created DateTime DEFAULT now()
 ) ENGINE = MergeTree()
-ORDER BY (date_created, report_id, source_ip);
-"
+ORDER BY (date_created, report_id, source_ip)"
 
 # Créer les tables pour les rapports forensiques
 echo "Creating forensic_reports table..."
-run_query "
-USE ${CLICKHOUSE_DATABASE};
-
-CREATE TABLE IF NOT EXISTS forensic_reports (
+run_query "CREATE TABLE IF NOT EXISTS ${CLICKHOUSE_DATABASE}.forensic_reports (
     id UUID DEFAULT generateUUIDv4(),
     date_created DateTime DEFAULT now(),
     feedback_type String,
@@ -94,15 +83,11 @@ CREATE TABLE IF NOT EXISTS forensic_reports (
     auth_failure Array(String),
     reported_domain String
 ) ENGINE = MergeTree()
-ORDER BY (date_created, reported_domain);
-"
+ORDER BY (date_created, reported_domain)"
 
 # Créer les tables pour les rapports SMTP TLS
 echo "Creating smtp_tls_reports table..."
-run_query "
-USE ${CLICKHOUSE_DATABASE};
-
-CREATE TABLE IF NOT EXISTS smtp_tls_reports (
+run_query "CREATE TABLE IF NOT EXISTS ${CLICKHOUSE_DATABASE}.smtp_tls_reports (
     id UUID DEFAULT generateUUIDv4(),
     date_created DateTime DEFAULT now(),
     organization_name String,
@@ -112,16 +97,12 @@ CREATE TABLE IF NOT EXISTS smtp_tls_reports (
     report_id String,
     policy_domain String
 ) ENGINE = MergeTree()
-ORDER BY (date_created, organization_name, report_id);
-"
+ORDER BY (date_created, organization_name, report_id)"
 
 echo "✅ ClickHouse test database initialized successfully!"
 
 # Vérifier que les tables ont été créées
 echo "📊 Verifying tables..."
-run_query "
-USE ${CLICKHOUSE_DATABASE};
-SHOW TABLES;
-"
+run_query "SHOW TABLES FROM ${CLICKHOUSE_DATABASE}"
 
 echo "🎉 ClickHouse setup complete!"

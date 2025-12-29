@@ -31,22 +31,27 @@ jobs:
           --health-timeout=5s
           --health-retries=3
       
-      zookeeper:
-        image: confluentinc/cp-zookeeper:latest
-        env:
-          ZOOKEEPER_CLIENT_PORT: 2181
-          ZOOKEEPER_TICK_TIME: 2000
-        ports:
-          - 2181:2181
-          
       kafka:
-        image: confluentinc/cp-kafka:latest
+        image: apache/kafka:latest
         env:
-          KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+          KAFKA_NODE_ID: 1
+          KAFKA_PROCESS_ROLES: broker,controller
+          KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
           KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
-          KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+          KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+          KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+          KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093
           KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-          KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+          KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+          KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+          KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+          KAFKA_NUM_NETWORK_THREADS: 3
+          KAFKA_NUM_IO_THREADS: 8
+          KAFKA_SOCKET_SEND_BUFFER_BYTES: 102400
+          KAFKA_SOCKET_RECEIVE_BUFFER_BYTES: 102400
+          KAFKA_SOCKET_REQUEST_MAX_BYTES: 104857600
+          KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
+          CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
         ports:
           - 9092:9092
           
@@ -89,17 +94,20 @@ jobs:
             sleep 2
           done
 
-          # Wait for Kafka (check if port is open)
+          # Wait for Kafka (needs more time to initialize KRaft metadata)
           echo "Waiting for Kafka..."
+          sleep 10  # Give Kafka time to initialize
+
           for i in {1..60}; do
             if nc -z localhost 9092 2>/dev/null; then
               echo "Kafka port is open!"
-              sleep 5  # Additional wait for Kafka to be fully ready
+              # Additional wait for Kafka to be fully ready and accept connections
+              sleep 10
               echo "Kafka is ready!"
               break
             fi
             echo "Waiting for Kafka... ($i/60)"
-            sleep 2
+            sleep 3
           done
 
           # Wait for MailHog
