@@ -96,14 +96,15 @@ jobs:
 
           # Wait for Kafka (needs more time to initialize KRaft metadata)
           echo "Waiting for Kafka..."
-          sleep 10  # Give Kafka time to initialize
+          sleep 15  # Give Kafka time to initialize
 
           for i in {1..60}; do
             if nc -z localhost 9092 2>/dev/null; then
               echo "Kafka port is open!"
               # Additional wait for Kafka to be fully ready and accept connections
-              echo "Waiting 20 seconds for Kafka to complete initialization..."
-              sleep 20
+              # Kafka KRaft needs ~90s to fully initialize metadata and consumer groups
+              echo "Waiting 90 seconds for Kafka to complete KRaft initialization..."
+              sleep 90
               echo "Kafka is ready!"
               break
             fi
