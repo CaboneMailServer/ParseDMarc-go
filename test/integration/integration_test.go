@@ -3,9 +3,12 @@ package integration
 import (
 	"context"
 	"fmt"
+	"net"
+	"strconv"
 	"testing"
 	"time"
 
+	"github.com/segmentio/kafka-go"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
@@ -14,7 +17,7 @@ import (
 	"parsedmarc-go/internal/config"
 	"parsedmarc-go/internal/http"
 	"parsedmarc-go/internal/imap"
-	"parsedmarc-go/internal/kafka"
+	kafkaclient "parsedmarc-go/internal/kafka"
 	"parsedmarc-go/internal/parser"
 	"parsedmarc-go/internal/smtp"
 	"parsedmarc-go/internal/storage/clickhouse"
@@ -186,6 +189,45 @@ func checkKafka() bool {
 	return false
 }
 
+// createKafkaTopics creates Kafka topics for testing
+func createKafkaTopics(brokers []string, topics ...string) error {
+	conn, err := kafka.Dial("tcp", brokers[0])
+	if err != nil {
+		return fmt.Errorf("failed to dial Kafka: %w", err)
+	}
+	defer conn.Close()
+
+	controller, err := conn.Controller()
+	if err != nil {
+		return fmt.Errorf("failed to get controller: %w", err)
+	}
+
+	controllerConn, err := kafka.Dial("tcp", net.JoinHostPort(controller.Host, strconv.Itoa(controller.Port)))
+	if err != nil {
+		return fmt.Errorf("failed to dial controller: %w", err)
+	}
+	defer controllerConn.Close()
+
+	var topicConfigs []kafka.TopicConfig
+	for _, topic := range topics {
+		if topic != "" {
+			topicConfigs = append(topicConfigs, kafka.TopicConfig{
+				Topic:             topic,
+				NumPartitions:     1,
+				ReplicationFactor: 1,
+			})
+		}
+	}
+
+	err = controllerConn.CreateTopics(topicConfigs...)
+	if err != nil {
+		// Ignore "topic already exists" errors
+		return nil
+	}
+
+	return nil
+}
+
 // checkMailHog verifies MailHog SMTP connection
 func checkMailHog() bool {
 	cfg := config.SMTPConfig{
@@ -226,11 +268,15 @@ func testClickHouseIntegration(t *testing.T, cfg config.ClickHouseConfig, logger
 
 // testKafkaIntegration tests Kafka integration
 func testKafkaIntegration(t *testing.T, cfg config.KafkaConfig, logger *zap.Logger) {
+	// Create topics first (Kafka auto-create doesn't work with writers)
+	err := createKafkaTopics(cfg.Hosts, cfg.AggregateTopic, cfg.ForensicTopic, cfg.SMTPTLSTopic)
+	require.NoError(t, err, "Failed to create Kafka topics")
+
 	kafkaClient := kafka.New(&cfg, logger)
 
 	// Test sending an aggregate report
 	report := createTestAggregateReport()
-	err := kafkaClient.SendAggregateReport(report)
+	err = kafkaClient.SendAggregateReport(report)
 	assert.NoError(t, err, "Failed to send Kafka aggregate report")
 }
 
@@ -297,6 +343,10 @@ func testHTTPIntegration(t *testing.T, cfg config.HTTPConfig, logger *zap.Logger
 
 // testEndToEndIntegration tests full pipeline
 func testEndToEndIntegration(t *testing.T, cfg *TestConfig, logger *zap.Logger) {
+	// Create topics first (Kafka auto-create doesn't work with writers)
+	err := createKafkaTopics(cfg.Kafka.Hosts, cfg.Kafka.AggregateTopic, cfg.Kafka.ForensicTopic, cfg.Kafka.SMTPTLSTopic)
+	require.NoError(t, err, "Failed to create Kafka topics")
+
 	// Create storage
 	storage, err := clickhouse.New(cfg.ClickHouse, logger)
 	require.NoError(t, err)
