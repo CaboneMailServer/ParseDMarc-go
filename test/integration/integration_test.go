@@ -115,8 +115,79 @@ func TestIntegrationSuite(t *testing.T) {
 
 // servicesAvailable checks if all required services are running
 func servicesAvailable(t *testing.T) bool {
-	// Simple check - could be more sophisticated
-	return true // For now, assume services are running
+	// Check ClickHouse
+	clickhouseAvailable := checkClickHouse()
+	if !clickhouseAvailable {
+		t.Log("ClickHouse not available on localhost:9000")
+	}
+
+	// Check Kafka
+	kafkaAvailable := checkKafka()
+	if !kafkaAvailable {
+		t.Log("Kafka not available on localhost:9092")
+	}
+
+	// Check MailHog
+	mailhogAvailable := checkMailHog()
+	if !mailhogAvailable {
+		t.Log("MailHog not available on localhost:1025")
+	}
+
+	// Return true only if all critical services are available
+	// MailHog is optional for basic tests
+	return clickhouseAvailable && kafkaAvailable
+}
+
+// checkClickHouse verifies ClickHouse connection
+func checkClickHouse() bool {
+	cfg := config.ClickHouseConfig{
+		Host:     "localhost",
+		Port:     9000,
+		Database: "parsedmarc_test",
+		Username: "parsedmarc",
+		Password: "test123",
+	}
+
+	logger, _ := zap.NewDevelopment()
+	storage, err := clickhouse.New(cfg, logger)
+	if err != nil {
+		return false
+	}
+	defer storage.Close()
+	return true
+}
+
+// checkKafka verifies Kafka connection
+func checkKafka() bool {
+	cfg := config.KafkaConfig{
+		Enabled:        true,
+		Hosts:          []string{"localhost:9092"},
+		AggregateTopic: "test-topic",
+	}
+
+	logger, _ := zap.NewDevelopment()
+	kafkaClient := kafka.New(&cfg, logger)
+
+	err := kafkaClient.TestConnection()
+	return err == nil
+}
+
+// checkMailHog verifies MailHog SMTP connection
+func checkMailHog() bool {
+	cfg := config.SMTPConfig{
+		Host: "localhost",
+		Port: 1025,
+	}
+
+	logger, _ := zap.NewDevelopment()
+	smtpClient := smtp.New(&cfg, logger)
+
+	// Try to create a connection
+	report := createTestAggregateReport()
+	err := smtpClient.SendAggregateReport(report)
+
+	// We expect error if MailHog is not running
+	return err == nil
 }
 
 // testClickHouseIntegration tests ClickHouse integration

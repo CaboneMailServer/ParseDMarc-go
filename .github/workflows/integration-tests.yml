@@ -48,15 +48,11 @@ jobs:
         env:
           KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
           KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+          KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
           KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
           KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
         ports:
           - 9092:9092
-        options: >-
-          --health-cmd="kafka-broker-api-versions --bootstrap-server localhost:9092"
-          --health-interval=30s
-          --health-timeout=10s
-          --health-retries=3
           
       mailhog:
         image: mailhog/mailhog:latest
@@ -96,15 +92,28 @@ jobs:
             echo "Waiting for ClickHouse... ($i/30)"
             sleep 2
           done
-          
-          # Wait for Kafka
+
+          # Wait for Kafka (check if port is open)
           echo "Waiting for Kafka..."
-          for i in {1..30}; do
-            if kafka-broker-api-versions --bootstrap-server localhost:9092 > /dev/null 2>&1; then
+          for i in {1..60}; do
+            if nc -z localhost 9092 2>/dev/null; then
+              echo "Kafka port is open!"
+              sleep 5  # Additional wait for Kafka to be fully ready
               echo "Kafka is ready!"
               break
             fi
-            echo "Waiting for Kafka... ($i/30)"
+            echo "Waiting for Kafka... ($i/60)"
+            sleep 2
+          done
+
+          # Wait for MailHog
+          echo "Waiting for MailHog..."
+          for i in {1..30}; do
+            if nc -z localhost 1025 2>/dev/null; then
+              echo "MailHog is ready!"
+              break
+            fi
+            echo "Waiting for MailHog... ($i/30)"
             sleep 2
           done
 
