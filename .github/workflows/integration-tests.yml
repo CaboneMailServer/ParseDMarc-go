@@ -60,7 +60,19 @@ jobs:
         ports:
           - 1025:1025
           - 8025:8025
-          
+
+      greenmail:
+        image: greenmail/standalone:latest
+        env:
+          GREENMAIL_OPTS: '-Dgreenmail.setup.test.all -Dgreenmail.hostname=0.0.0.0 -Dgreenmail.auth.disabled'
+        ports:
+          - 3143:3143
+          - 3993:3993
+          - 3025:3025
+          - 3465:3465
+          - 3110:3110
+          - 3995:3995
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -123,6 +135,17 @@ jobs:
             sleep 2
           done
 
+          # Wait for Greenmail IMAP
+          echo "Waiting for Greenmail IMAP..."
+          for i in {1..30}; do
+            if nc -z localhost 3143 2>/dev/null; then
+              echo "Greenmail IMAP is ready!"
+              break
+            fi
+            echo "Waiting for Greenmail... ($i/30)"
+            sleep 2
+          done
+
       - name: Initialize test environment
         run: |
           # Make scripts executable
@@ -154,6 +177,9 @@ jobs:
           echo "MailHog port status:"
           nc -zv localhost 1025 || echo "MailHog port not open"
           echo ""
+          echo "Greenmail IMAP port status:"
+          nc -zv localhost 3143 || echo "Greenmail port not open"
+          echo ""
           echo "Running containers:"
           docker ps || echo "Cannot list containers"
 
@@ -163,4 +189,5 @@ jobs:
           echo "## Integration Test Results" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ ClickHouse integration tested" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Kafka integration tested" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ IMAP integration tested (Greenmail)" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Email output integration tested" >> $GITHUB_STEP_SUMMARY

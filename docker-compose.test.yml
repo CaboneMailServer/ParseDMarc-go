@@ -58,18 +58,18 @@ services:
     networks:
       - parsedmarc_test
 
-  # Dovecot for IMAP testing
-  dovecot:
-    image: dovecot/dovecot:latest
+  # Greenmail for IMAP/SMTP testing (simpler than Dovecot for tests)
+  greenmail:
+    image: greenmail/standalone:latest
     environment:
-      DOVECOT_HOSTNAME: test-dovecot
-      DOVECOT_POSTMASTER: admin@test.local
+      GREENMAIL_OPTS: '-Dgreenmail.setup.test.all -Dgreenmail.hostname=0.0.0.0 -Dgreenmail.auth.disabled'
     ports:
-      - "143:143"   # IMAP
-      - "993:993"   # IMAPS
-    volumes:
-      - ./test/fixtures/dovecot:/etc/dovecot/conf.d:ro
-      - ./test/fixtures/mail:/var/mail
+      - "3143:3143"  # IMAP
+      - "3993:3993"  # IMAPS
+      - "3025:3025"  # SMTP
+      - "3465:3465"  # SMTPS
+      - "3110:3110"  # POP3
+      - "3995:3995"  # POP3S
     networks:
       - parsedmarc_test
 

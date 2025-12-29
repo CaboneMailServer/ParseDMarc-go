@@ -53,9 +53,9 @@ func NewTestConfig() *TestConfig {
 		IMAP: config.IMAPConfig{
 			Enabled:         true,
 			Host:            "localhost",
-			Port:            143,
-			Username:        "testuser@test.local",
-			Password:        "testpass",
+			Port:            3143,
+			Username:        "test@localhost",
+			Password:        "test",
 			Mailbox:         "INBOX",
 			CheckInterval:   30,
 			DeleteProcessed: false,
@@ -136,8 +136,14 @@ func servicesAvailable(t *testing.T) bool {
 		t.Log("MailHog not available on localhost:1025")
 	}
 
+	// Check Greenmail IMAP
+	greenmailAvailable := checkGreenmail()
+	if !greenmailAvailable {
+		t.Log("Greenmail IMAP not available on localhost:3143")
+	}
+
 	// Return true only if all critical services are available
-	// MailHog is optional for basic tests
+	// MailHog and Greenmail are optional for basic tests
 	return clickhouseAvailable && kafkaAvailable
 }
 
@@ -246,6 +252,16 @@ func checkMailHog() bool {
 	return err == nil
 }
 
+// checkGreenmail verifies Greenmail IMAP connection
+func checkGreenmail() bool {
+	conn, err := net.DialTimeout("tcp", "localhost:3143", 5*time.Second)
+	if err != nil {
+		return false
+	}
+	conn.Close()
+	return true
+}
+
 // testClickHouseIntegration tests ClickHouse integration
 func testClickHouseIntegration(t *testing.T, cfg config.ClickHouseConfig, logger *zap.Logger) {
 	// Wait for ClickHouse to be ready
@@ -282,6 +298,12 @@ func testKafkaIntegration(t *testing.T, cfg config.KafkaConfig, logger *zap.Logg
 
 // testIMAPIntegration tests IMAP integration
 func testIMAPIntegration(t *testing.T, cfg config.IMAPConfig, logger *zap.Logger) {
+	// Check if Greenmail is available first
+	if !checkGreenmail() {
+		t.Skip("Greenmail IMAP server not available")
+		return
+	}
+
 	// Create parser for IMAP client
 	parser := parser.New(config.ParserConfig{}, nil, logger)
 	imapClient := imap.New(cfg, parser, logger)
@@ -289,7 +311,7 @@ func testIMAPIntegration(t *testing.T, cfg config.IMAPConfig, logger *zap.Logger
 	// Test connection
 	err := imapClient.Connect()
 	if err != nil {
-		t.Skipf("IMAP connection failed (expected in test environment): %v", err)
+		t.Errorf("IMAP connection failed: %v", err)
 		return
 	}
 	defer func() {
@@ -298,7 +320,7 @@ func testIMAPIntegration(t *testing.T, cfg config.IMAPConfig, logger *zap.Logger
 		}
 	}()
 
-	// Test processing messages (should not fail)
+	// Test processing messages (should not fail even if mailbox is empty)
 	err = imapClient.ProcessMessages()
 	assert.NoError(t, err, "Failed to process IMAP messages")
 }
