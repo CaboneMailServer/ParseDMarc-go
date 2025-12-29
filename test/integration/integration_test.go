@@ -157,7 +157,7 @@ func checkClickHouse() bool {
 	return true
 }
 
-// checkKafka verifies Kafka connection
+// checkKafka verifies Kafka connection with retries
 func checkKafka() bool {
 	cfg := config.KafkaConfig{
 		Enabled:        true,
@@ -168,8 +168,22 @@ func checkKafka() bool {
 	logger, _ := zap.NewDevelopment()
 	kafkaClient := kafka.New(&cfg, logger)
 
-	err := kafkaClient.TestConnection()
-	return err == nil
+	// Retry connection test a few times with delays
+	// Kafka might need extra time after port opens
+	maxRetries := 3
+	for i := 0; i < maxRetries; i++ {
+		err := kafkaClient.TestConnection()
+		if err == nil {
+			return true
+		}
+
+		if i < maxRetries-1 {
+			// Wait before retrying (exponential backoff)
+			time.Sleep(time.Duration(2*(i+1)) * time.Second)
+		}
+	}
+
+	return false
 }
 
 // checkMailHog verifies MailHog SMTP connection

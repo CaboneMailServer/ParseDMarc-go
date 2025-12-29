@@ -102,7 +102,8 @@ jobs:
             if nc -z localhost 9092 2>/dev/null; then
               echo "Kafka port is open!"
               # Additional wait for Kafka to be fully ready and accept connections
-              sleep 10
+              echo "Waiting 20 seconds for Kafka to complete initialization..."
+              sleep 20
               echo "Kafka is ready!"
               break
             fi
