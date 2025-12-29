@@ -169,7 +169,7 @@ func checkKafka() bool {
 	}
 
 	logger, _ := zap.NewDevelopment()
-	kafkaClient := kafka.New(&cfg, logger)
+	kafkaClient := kafkaclient.New(&cfg, logger)
 
 	// Retry connection test a few times with delays
 	// Kafka might need extra time after port opens
@@ -272,7 +272,7 @@ func testKafkaIntegration(t *testing.T, cfg config.KafkaConfig, logger *zap.Logg
 	err := createKafkaTopics(cfg.Hosts, cfg.AggregateTopic, cfg.ForensicTopic, cfg.SMTPTLSTopic)
 	require.NoError(t, err, "Failed to create Kafka topics")
 
-	kafkaClient := kafka.New(&cfg, logger)
+	kafkaClient := kafkaclient.New(&cfg, logger)
 
 	// Test sending an aggregate report
 	report := createTestAggregateReport()
@@ -356,7 +356,7 @@ func testEndToEndIntegration(t *testing.T, cfg *TestConfig, logger *zap.Logger) 
 	_ = parser.New(config.ParserConfig{}, storage, logger)
 
 	// Create Kafka client
-	kafkaClient := kafka.New(&cfg.Kafka, logger)
+	kafkaClient := kafkaclient.New(&cfg.Kafka, logger)
 
 	// Test full pipeline: Parse -> Store -> Send to Kafka
 	report := createTestAggregateReport()
