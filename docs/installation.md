@@ -16,7 +16,7 @@ Download the pre-compiled binary for your platform:
 
 ### Linux x86_64
 ```bash
-curl -L -o parsedmarc-go https://github.com/ZenProjects/parsedmarc-go/releases/latest/download/parsedmarc-go-linux-amd64
+curl -L -o parsedmarc-go https://cabonemailserver.github.io/ParseDMarc-go/releases/latest/download/parsedmarc-go-linux-amd64
 chmod +x parsedmarc-go
 sudo mv parsedmarc-go /usr/local/bin/
 ```
@@ -24,14 +24,14 @@ sudo mv parsedmarc-go /usr/local/bin/
 ### Windows x86_64
 ```powershell
 # Download from GitHub releases page and add to PATH
-Invoke-WebRequest -Uri "https://github.com/ZenProjects/parsedmarc-go/releases/latest/download/parsedmarc-go-windows-amd64.exe" -OutFile "parsedmarc-go.exe"
+Invoke-WebRequest -Uri "https://cabonemailserver.github.io/ParseDMarc-go/releases/latest/download/parsedmarc-go-windows-amd64.exe" -OutFile "parsedmarc-go.exe"
 ```
 
 ## Method 2: Docker
 
 ### Build from Source
 ```bash
-git clone https://github.com/ZenProjects/parsedmarc-go.git
+git clone https://cabonemailserver.github.io/ParseDMarc-go.git
 cd parsedmarc-go
 docker build -t parsedmarc-go .
 ```
@@ -64,7 +64,7 @@ docker run -d --name parsedmarc-go \
 ### Build Steps
 ```bash
 # Clone repository
-git clone https://github.com/ZenProjects/parsedmarc-go.git
+git clone https://cabonemailserver.github.io/ParseDMarc-go.git
 cd parsedmarc-go
 
 # Download dependencies

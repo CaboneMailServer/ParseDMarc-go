@@ -240,6 +240,6 @@ This project is licensed under the Apache 2.0 License - see the [LICENSE](LICENS
 
 **📞 Issues**
 
-- [GitHub Issues](https://github.com/ZenProjects/parsedmarc-go.git/issues)
+- [GitHub Issues](https://cabonemailserver.github.io/ParseDMarc-go.git/issues)
 
 
